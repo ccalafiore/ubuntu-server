@@ -10,13 +10,13 @@ can run the command without options for minimal device info.
 You can use the option `-f` or `--fs` like below to output some filesystem
 device info.
 ```
-lsblf -f
+lsblk -f
 ```
 You can use the option `-o <list>` or `--output <list>` to select the output
 device info, by replacing `<list>` with the selected info names separated by
 commas. For example,
 ```
-lsblk -o name,path,label,type,fstype,fsver,size,fssize,fsused,fsuse%,fsavail,mountpoints
+lsblk -o name,label,path,type,partn,size,fssize,fsused,fsuse%,fsavail,parttypename,parttype,pttype,fstype,fsver,mountpoints
 ```
 
 You can also identify the name of the existing RAIDs with:
@@ -32,5 +32,7 @@ it is connected via a PCIe port.
 
 In my case, the name and path of the new device are `sde` and `/dev/sde`, in turn. On
 the other hand, the name and the path of the existing RAID 1 are `md0` and `/dev/md0`.
+
+
 
 
