@@ -4,8 +4,8 @@
 
 ## Identify the device names
 Identify the device names and paths of the new drive (e.g., `nvme2n1` and
-`/dev/nvme2n1`) and the existing RAID 1 (e.g., `md0` and `/dev/md0`) using `lsblk`.
-You can run the command without options for minimal device info.
+`/dev/nvme2n1`) and the existing RAID 1 (e.g., `md0` and `/dev/md0`) using
+`lsblk`. You can run the command without options for minimal device info.
 
 You can use the option `-f` or `--fs` like below to output some filesystem
 device info.
@@ -29,32 +29,34 @@ Expect that the name of a phisical drive starts with either `sd` (sata disk) or
 connected to the motherboard via a SATA port. However, it starts with `nvme` if
 it is connected via a PCIe port.
 
-In my case, the name and path of the new device are `nvme2n1` and `/dev/nvme2n1`, in turn. On
-the other hand, the name and the path of the existing RAID 1 are `md0` and `/dev/md0`.
+In my case, the name and path of the new device are `nvme2n1` and
+`/dev/nvme2n1`, in turn. On the other hand, the name and the path of the
+existing RAID 1 are `md0` and `/dev/md0`.
 
 
 ## Create in the New Disk the same Partitions as the old Disks of the RAID  
 
-We need to create in the new disk (e.g., /dev/nvme2n1) the same two partitions of
-the old disks (e.g., /dev/nvme0n1 and /dev/nvme1n1) that are already the members of the existing
-RAID. They should have the minimum sizes and the same types of the partitions in the old
-disks.
+We need to create in the new disk (e.g., `/dev/nvme2n1`) the same two partitions
+of the old disks (e.g., `/dev/nvme0n1` and `/dev/nvme1n1`) that are already the
+members of the existing RAID. They should have the minimum sizes and the same
+types of the partitions in the old disks.
 
 ### Get the Partition Sizes and Types of the Old Disks
-Get the sizes (in sectors) and types of the two partitions in the old disks with:
+Get the sizes (in sectors) and types of the two partitions in the old disks
+with:
 ```
 sudo parted <old_disk_path> unit s p
 ```
 by replacing the <old_disk_path> with the device path of one of the old disks
-(e.g., /dev/nvme0n1 or /dev/nvme1n1).
+(e.g., `/dev/nvme0n1` or `/dev/nvme1n1`).
 
 In the example below, the output has a table with two rows, one for each
 partition. You can find the partition sizes and types in the columns "Size" and
 "Name", in turn. In this case, we will need to create two partitions in the new
 disk. The first partition needs to be with partition type "EFI system partition"
-and size "2201600" sectors. The second partition needs to have a type "Linux
-filesystem" and a size minimum "486191104" sectors, i.e. the
-minimum of "486191104" and "490000000").
+and size of 2201600 sectors. The second partition needs to have a type "Linux
+filesystem" and a size of minimum 486191104 sectors, i.e. the minimum of
+486191104 and 490000000).
 
 ```
 cc@cdw:~$ sudo parted /dev/nvme0n1 unit s p
@@ -73,18 +75,46 @@ Number  Start     End         Size        File system  Name                  Fla
 ### Create the Partitions in the New Disk
 
 Once you know the sizes and types of the partitions to be created in the new
-disk, you can create them interactively with `gdisk`:
+disk, you can create them interactively with `gdisk`.
 
 - Start the iteractive partition creation with `sudo gdisk <new_disk_path>` by
-replacing <disk_path> with the device path of the new disk. In my case, the
-device path of the new disk is /dev/nvme2n1.
+replacing `<disk_path>` with the device path of the new disk. In my case, the
+device path of the new disk is `/dev/nvme2n1`.
 
-You can type `d` and press the keybourd "Enter", to delete any unwanted existing partitions.
+- If needed, delete unwanted existing partitions. Type `d`, press the key
+"Enter", type the partition ID (or partition number) and press "Enter".
 
-Then, you can type `n` and "Enter" to create the EFI partion.
+- Create the new EFI partition by typing `n` and press "Enter".
 
-Input the desired "First sector" and "Last sector". You can use the default first sector by leaving blank and press "Enter".
+- Type the partition number and press "Enter". Use the Default value by leaving
+it blank and press "Enter".
 
-you can choose the `+2201600` and ente
+- Input the desired "First sector" and "Enter. To use the default value, leave
+it blank and press "Enter".
 
-the partion "Hex code" 
+- Input `+<size>` for the "Last sector", by replacing `<size>` with the desired
+partition size. In our example, the size was 2201600 sectors, so the last sector
+input would be `+2201600`.
+
+- Input the partion type "Hex code" and press "Enter". The hex code for "EFI
+system partition" is `ef00`. If you do not know the hex code for "EFI system
+partition", you can type `l`, press "Enter", input "EFI system partition" and
+"Enter" to get the hex code. Now, input the hex code and "Enter".
+
+- Create the new "Linux filesystem" partition by typing `n` and press "Enter".
+
+- Type the partition number and press "Enter". Use the Default value by leaving
+it blank and press "Enter".
+
+- Input the desired "First sector" and "Enter. To use the default value, leave
+it blank and press "Enter".
+
+- Input `+<size>` for the "Last sector", by replacing `<size>` with the desired
+partition size. In our example, the size was 486191104 sectors, so input would
+be `+486191104`.
+
+- Input the partion type "Hex code" and press "Enter". The hex code for "Linux
+filesystem" partition is `8300`. If you do not know the hex code for "Linux
+filesystem", you can type `l`, press "Enter", input "Linux filesystem" and
+"Enter" to get the hex code. Now, input the hex code and "Enter".
+
