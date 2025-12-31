@@ -161,6 +161,8 @@ Copy all contents in /boot/efi to /mnt/efi_new
 sudo rsync -av --progress --stats /boot/efi/ /mnt/efi_new/
 ```
 
+Now, unmount /dev/nvme2n1p1?
+
 Maybe, do this after completion of the RAID build:
 ```
 sudo grub-install /dev/nvme2n1p1
