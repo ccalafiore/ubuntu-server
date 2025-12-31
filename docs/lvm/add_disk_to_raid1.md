@@ -129,6 +129,8 @@ Add the second partion of the new disk to the existing RAID with:
 sudo mdadm --add /dev/md0 /dev/nvme2n1p2
 ```
 
+Resize the RAID?
+
 Check the status of the RAID with:
 ```
 cat /proc/mdstat
