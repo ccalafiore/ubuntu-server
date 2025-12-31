@@ -156,9 +156,9 @@ If not mounted, mount the EFI partition of one of the old disks with:
 sudo mount /dev/nvme0n1p1 /boot/efi
 ```
 
-Copy all contents in /boot/efi to /mnt/new_efi
+Copy all contents in /boot/efi to /mnt/efi_new
 ```
-sudo rsync -avh --progress /boot/efi/ /mnt/new_efi/
+sudo rsync -av --progress --stats /boot/efi/ /mnt/efi_new/
 ```
 
 Maybe, do this after completion of the RAID build:
