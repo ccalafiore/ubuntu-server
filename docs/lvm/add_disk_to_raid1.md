@@ -118,3 +118,55 @@ filesystem" partition is `8300`. If you do not know the hex code for "Linux
 filesystem", you can type `l`, press "Enter", input "Linux filesystem" and
 "Enter" to get the hex code. Now, input the hex code and "Enter".
 
+
+
+
+
+## TODO
+
+Add the second partion of the new disk to the existing RAID with:
+```
+sudo mdadm --add /dev/md0 /dev/nvme2n1p2
+```
+
+Check the status of the RAID with:
+```
+cat /proc/mdstat
+```
+or
+```
+sudo mdadm --detail /dev/md0
+```
+
+
+
+Format the EFI partition of the new disk with:
+```
+sudo mkfs.vfat -F32 /dev/nvme2n1p1
+```
+
+Mount the EFI partition of the new disk with:
+```
+sudo mkdir -p /mnt/efi_new
+sudo mount /dev/nvme2n1p1 /mnt/efi_new
+```
+
+If not mounted, mount the EFI partition of one of the old disks with:
+```
+sudo mount /dev/nvme0n1p1 /boot/efi
+```
+
+Copy all contents in /boot/efi to /mnt/new_efi
+```
+sudo rsync -avh --progress /boot/efi/ /mnt/new_efi/
+```
+
+Maybe, do this after completion of the RAID build:
+```
+sudo grub-install /dev/nvme2n1p1
+```
+
+Maybe, also this:
+```
+sudo update-initramfs -u
+```
