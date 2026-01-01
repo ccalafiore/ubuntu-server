@@ -47,6 +47,14 @@ with:
 ```
 sudo parted <old_disk_path> unit s p
 ```
+or
+```
+sudo gdisk -l <old_disk_path>
+```
+or
+```
+sudo fdisk -l <old_disk_path>
+```
 by replacing the <old_disk_path> with the device path of one of the old disks
 (e.g., `/dev/nvme0n1` or `/dev/nvme1n1`).
 
