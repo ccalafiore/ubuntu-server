@@ -129,7 +129,7 @@ Add the second partion of the new disk to the existing RAID with:
 sudo mdadm --add /dev/md0 /dev/nvme2n1p2
 ```
 
-Resize the RAID?
+Resize the RAID with `sudo pvresize /dev/md0` (not tested)?
 
 Check the status of the RAID with:
 ```
@@ -163,7 +163,18 @@ Copy all contents in /boot/efi to /mnt/efi_new
 sudo rsync -av --progress --stats /boot/efi/ /mnt/efi_new/
 ```
 
-Now, unmount /dev/nvme2n1p1?
+Unmount new and old efi partitions?
+
+```
+sudo umount /boot/efi
+sudo umount /mnt/efi_new
+```
+or
+```
+sudo umount /dev/nvme0n1p1
+sudo umount /dev/nvme2n1p1
+```
+
 
 Maybe, do this after completion of the RAID build:
 ```
