@@ -128,16 +128,12 @@ filesystem", you can type `l`, press "Enter", input "Linux filesystem" and
 
 
 
-
-
-## TODO
+## Add the "Linux filesystem" partition of the new disk to the RAID
 
 Add the second partion of the new disk to the existing RAID with:
 ```
 sudo mdadm --add /dev/md0 /dev/nvme2n1p2
 ```
-
-Resize the RAID with `sudo pvresize /dev/md0` (not tested)?
 
 Check the status of the RAID with:
 ```
@@ -149,6 +145,7 @@ sudo mdadm --detail /dev/md0
 ```
 
 
+# Finish the EFI partition
 
 Format the EFI partition of the new disk with:
 ```
@@ -171,6 +168,12 @@ Copy all contents in /boot/efi to /mnt/efi_new
 sudo rsync -av --progress --stats /boot/efi/ /mnt/efi_new/
 ```
 
+Maybe, do the below after completion of the RAID build. This seems to do more
+bad thn good. So, maybe skip it for now.
+```
+sudo grub-install /dev/nvme2n1p1
+```
+
 Unmount new and old efi partitions?
 
 ```
@@ -183,11 +186,45 @@ sudo umount /dev/nvme0n1p1
 sudo umount /dev/nvme2n1p1
 ```
 
+Remove or comment the line of `/etc/fstab` mounting any EFI partition as root with `nano`.
+```
+sudo nano /etc/fstab
+```
 
-Maybe, do this after completion of the RAID build:
+
+## Resize the RAID and partitions
+
+Once RAID sync has finished, resize the RAID with:
 ```
-sudo grub-install /dev/nvme2n1p1
+sudo mdadm --grow /dev/md0 --size=max
 ```
+Resize the unformated RAID partition with `fdisk`:
+```
+sudo fdisk /dev/md0p2
+```
+
+You may need to delete a swap partition. Follow the steps:
+- remove the swap line in /etc/fstab as root.
+- run `sudo swapoff /dev/mapper/vg0-lv--1`
+- delete the swap partition with `fdisk` or `gdisk`.
+
+
+Resize logical volume with in the RAID or RAID partition with:
+```
+sudo lvextend -l +100%FREE /dev/mapper/vg0-lv--0
+```
+Maybe, this to resize the ext4 file system:
+```
+sudo resize2fs /dev/mapper/vg0-lv--0
+```
+
+You may recreate the swap partition with:
+```
+todo
+```
+
+
+
 
 Maybe, also this:
 ```
