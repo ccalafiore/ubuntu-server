@@ -194,39 +194,51 @@ sudo nano /etc/fstab
 
 ## Resize the RAID and partitions
 
-Once RAID sync has finished, resize the RAID with:
+
+It safer to do the following steps once RAID sync has finishe.
+
+
+You may need to turn swap off with: `sudo swapoff /dev/mapper/vg0-lv--1`
+
+resize the RAID with:
 ```
 sudo mdadm --grow /dev/md0 --size=max
 ```
-Resize the unformated RAID partition with `fdisk`:
+Resize the RAID partition `/dev/md0p2` with `fdisk`:
 ```
-sudo fdisk /dev/md0p2
+sudo fdisk /dev/md0
+```
+1. press `p` and "Enter" to print the current partition table.
+2. press `d`, "Enter", `2` and "Enter" to delete the partiotion 2 thant you want to resize.
+3. press `n` to create a new partion.
+4. Input all parameters of the new partition "Partition number", "First sector"
+and "Last sector". "Partition number" and "First sector" have to be the same as
+the partition 2 that you deleted. Otherwise, you may lose all data in the
+partition 2. "Last sector" can be changed.
+5. The new partition type also has to be the same as the partition that was
+deleted. If they do not match by default, then you need to changes with `t` and
+"Enter".
+
+
+Resize the phicical volume with:
+```
+sudo pvresize /dev/md0p2
 ```
 
-You may need to delete a swap partition. Follow the steps:
-- remove the swap line in /etc/fstab as root.
-- run `sudo swapoff /dev/mapper/vg0-lv--1`
-- delete the swap partition with `fdisk` or `gdisk`.
-
-
-Resize logical volume with in the RAID or RAID partition with:
+Resize the logical volume with:
 ```
 sudo lvextend -l +100%FREE /dev/mapper/vg0-lv--0
 ```
-Maybe, this to resize the ext4 file system:
+Resize the ext4 file system with:
 ```
 sudo resize2fs /dev/mapper/vg0-lv--0
 ```
 
-You may recreate the swap partition with:
-```
-todo
-```
 
 
 
 
-Maybe, also this:
+## Maybe, also this:
 ```
 sudo update-initramfs -u
 ```
