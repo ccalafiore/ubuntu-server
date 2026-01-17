@@ -64,7 +64,10 @@ partition. You can find the partition sizes and types in the columns "Size" and
 disk. The first partition needs to be with partition type "EFI system partition"
 and size of 2201600 sectors. The second partition needs to have a type "Linux
 filesystem" and a size of minimum 486191104 sectors, i.e. the minimum of
-486191104 and 490000000).
+486191104 and 490000000). If the available sectors in your new disk for the
+second partition are less, then use the maximum number of available sectors in
+the new disk for the second partition and later you will need to shrink the RAID
+size such that it can be fit in this smaller partition.
 
 ```
 cc@cdw:~$ sudo parted /dev/nvme0n1 unit s p
@@ -119,13 +122,56 @@ it blank and press "Enter".
 
 - Input `+<size>` for the "Last sector", by replacing `<size>` with the desired
 partition size. In our example, the size was 486191104 sectors, so input would
-be `+486191104`.
+be `+486191104`. If the available number of sectors are less than 486191104,
+then leave empty and press "Enter" to use the default value which is all
+available sectors in the disk. 
 
 - Input the partion type "Hex code" and press "Enter". The hex code for "Linux
 filesystem" partition is `8300`. If you do not know the hex code for "Linux
 filesystem", you can type `l`, press "Enter", input "Linux filesystem" and
 "Enter" to get the hex code. Now, input the hex code and "Enter".
 
+
+
+## Shrink the RAID Partition in the old Disks
+
+Follow these steps only if the RAID partition in new disk is to small to be
+added to the new RAID.
+
+### Boot an ubuntu instattation media
+First, Make a bootable usb drive with the ubuntu istallation. Both desktop and
+server version would work. Boot the installation media and select "Try or
+install ubuntu". You don't need to install another operating system. You only
+need to a terminal from the installation media.
+
+### Shrink the desired partition file systems in the old RAID
+The commands are different for different file system types
+
+#### shrink file systems ext4 
+
+To check the current file sistem size you need to mount the partition somewhere,
+but unmount it as soon you have checked the size. It is very important that any
+partition in the RAID is unmounted before modifying it.
+```
+sudo mkdir -p /mnt/tmp
+sudo mount /dev/mapper/vg0-lv--0 /mnt/tmp
+df -h /mnt/tmp
+sudo umount /mnt/tmp
+```
+
+Fix the file system errors with:
+```
+sudo e2fsck -f /dev/mapper/vg0-lv--0
+```
+The above will also print the used and total blocks in your ext4 file system
+with the format: `<used>/<total> blocks` you need to choose a number of blocks
+between the used and the total bolcks printed by the above command.
+
+```
+sudo resize2fs /dev/mapper/vg0-lv--0 <choosen_n_blocks>
+```
+
+### Shrink the Logical Volume
 
 
 ## Add the "Linux filesystem" partition of the new disk to the RAID
@@ -192,10 +238,10 @@ sudo nano /etc/fstab
 ```
 
 
-## Resize the RAID and partitions
+## Expand the size of the RAID and partitions to Maximum
 
 
-It safer to do the following steps once RAID sync has finishe.
+It is safer to do the following steps once RAID sync has finished.
 
 
 You may need to turn swap off with: `sudo swapoff /dev/mapper/vg0-lv--1`
