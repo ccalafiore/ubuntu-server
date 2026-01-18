@@ -141,37 +141,38 @@ added to the new RAID.
 ### Boot an ubuntu instattation media
 First, Make a bootable usb drive with the ubuntu istallation. Both desktop and
 server version would work. Boot the installation media and select "Try or
-install ubuntu". You don't need to install another operating system. You only
+Install Ubuntu". You don't need to install another operating system. You only
 need to a terminal from the installation media.
 
-### Shrink the desired partition file systems in the old RAID
-The commands are different for different file system types
 
-#### shrink file systems ext4 
+### Check the Current Partition and Filesystem Sizes in the Old RAID
 
-To check the current file sistem size you need to mount the partition somewhere,
-but unmount it as soon you have checked the size. It is very important that any
-partition in the RAID is unmounted before modifying it.
+To only check the current partition size, you can just run this:
+
+```
+lsblk -o model,name,path,size,mountpoints
+```
+
+To check the current partition and filesystem sizes you need to mount the partition somewhere,
+but unmount it as soon you have checked the filesystem size.
+
+Warning: You may lose all your data if resize any partition or logical volume while it is mounted. Any partition or logical volume in the RAID has to be unmounted before resizing it. 
+
 ```
 sudo mkdir -p /mnt/tmp
 sudo mount /dev/mapper/vg0-lv--0 /mnt/tmp
-df -h /mnt/tmp
+lsblk -o model,name,path,size,fssize,mountpoints
 sudo umount /mnt/tmp
 ```
 
-Fix the file system errors with:
-```
-sudo e2fsck -f /dev/mapper/vg0-lv--0
-```
-The above will also print the used and total blocks in your ext4 file system
-with the format: `<used>/<total> blocks` you need to choose a number of blocks
-between the used and the total bolcks printed by the above command.
 
+### Shrink a Logical Volume in the old RAID
+
+Reduce the size of the logical volume and its filesystem with:
 ```
-sudo resize2fs /dev/mapper/vg0-lv--0 <choosen_n_blocks>
+sudo lvreduce --size 50G --resizefs vg0/lv-0
 ```
 
-### Shrink the Logical Volume
 
 
 ## Add the "Linux filesystem" partition of the new disk to the RAID
@@ -266,19 +267,27 @@ deleted. If they do not match by default, then you need to changes with `t` and
 "Enter".
 
 
-Resize the phicical volume with:
+Extend the size of the phisical volume to maximum with:
 ```
 sudo pvresize /dev/md0p2
 ```
 
-Resize the logical volume with:
+
+Extend the size of the logical volume and its filesystem to maximum with:
+
 ```
-sudo lvextend -l +100%FREE /dev/mapper/vg0-lv--0
+sudo lvextend --extents +100%FREE --resizefs vg0/lv-0
 ```
-Resize the ext4 file system with:
-```
-sudo resize2fs /dev/mapper/vg0-lv--0
-```
+
+
+
+
+
+
+
+
+
+
 
 
 
