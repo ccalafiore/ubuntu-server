@@ -138,7 +138,7 @@ filesystem", you can type `l`, press "Enter", input "Linux filesystem" and
 Follow these steps only if the RAID partition in new disk is to small to be
 added to the new RAID.
 
-### Boot an ubuntu instattation media
+### Boot an ubuntu instattation media (didn't work from an installation media)
 First, Make a bootable usb drive with the ubuntu istallation. Both desktop and
 server version would work. Boot the installation media and select "Try or
 Install Ubuntu". You don't need to install another operating system. You only
@@ -171,6 +171,47 @@ sudo umount /mnt/tmp
 Reduce the size of the logical volume and its filesystem with:
 ```
 sudo lvreduce --size 50G --resizefs vg0/lv-0
+```
+
+
+### Shrink the Phisical Volumes
+
+```
+sudo pvmove /dev/md0p2
+```
+
+```
+sudo pvmove --alloc anywhere /dev/md127p2:58804-71603 /dev/md127p2:0-12799
+```
+
+
+Reduce the size of the physical volume to 100 GiB with:
+```
+sudo pvresize --setphysicalvolumesize 100G /dev/md0p2
+```
+
+
+
+
+### shrink the Partitions in the old RAID
+
+```
+sudo fdisk /dev/md0
+```
+
+
+### shrink the RAID
+
+```
+sudo mdadm --grow /dev/md0 --size=170G
+```
+
+### Shrink the partitions in all disks that host the RAID
+
+```
+sudo fdisk /dev/nvme0n1p2
+
+sudo fdisk /dev/nvme2n1
 ```
 
 
