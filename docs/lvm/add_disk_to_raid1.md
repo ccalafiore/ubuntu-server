@@ -1,20 +1,28 @@
 
 
-# Add a New Disk to an Existing RAID 1 
+# Add a New Disk to an Existing RAID 1 Hosting the OS 
 
 ## Identify the device names
+
 Identify the device names and paths of the new drive (e.g., `nvme2n1` and
 `/dev/nvme2n1`) and the existing RAID 1 (e.g., `md0` and `/dev/md0`) using
 `lsblk`. You can run the command without options for minimal device info.
+
+The name of a phisical drive should start with either `sd` (sata disk) or
+`nvme` (Non-Volatile Memory Express). It starts with `sd` if it is phisically
+connected to the motherboard via a SATA port. However, it starts with `nvme` if
+it is connected via a PCIe port. In my case, the name and path of the new device are `nvme2n1` and
+`/dev/nvme2n1`, in turn.
+
 
 You can use the option `-f` or `--fs` like below to output some filesystem
 device info.
 ```
 lsblk -f
 ```
-You can use the option `-o <list>` or `--output <list>` to select the output
-device info, by replacing `<list>` with the selected info names separated by
-commas. For example,
+You can use the option `-o <list>` or `--output <list>` to manually select the
+output device info, by replacing `<list>` with the selected info names separated
+by commas. For example,
 ```
 lsblk -o model,name,path,type,partn,fstype,parttypename,pttype,size,fssize,fsuse%,fsused,fsavail,mountpoints
 ```
@@ -24,13 +32,9 @@ You can also identify the name of the existing RAIDs with:
 cat /proc/mdstat
 ```
 
-Expect that the name of a phisical drive starts with either `sd` (sata disk) or
-`nvme` (Non-Volatile Memory Express). It starts with `sd` if it is phisically
-connected to the motherboard via a SATA port. However, it starts with `nvme` if
-it is connected via a PCIe port.
 
-In my case, the name and path of the new device are `nvme2n1` and
-`/dev/nvme2n1`, in turn. On the other hand, the name and the path of the
+
+On the other hand, the name and the path of the
 existing RAID 1 are `md0` and `/dev/md0`.
 
 
